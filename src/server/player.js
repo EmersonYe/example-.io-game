@@ -3,12 +3,14 @@ const Bullet = require('./bullet');
 const Constants = require('../shared/constants');
 
 class Player extends ObjectClass {
+
   constructor(id, username, x, y) {
     super(id, x, y, Math.random() * 2 * Math.PI, Constants.PLAYER_SPEED);
     this.username = username;
     this.hp = Constants.PLAYER_MAX_HP;
     this.fireCooldown = 0;
     this.score = 0;
+    this.gunLevel = 1;
   }
 
   // Returns a newly created bullet, or null.
@@ -26,7 +28,18 @@ class Player extends ObjectClass {
     this.fireCooldown -= dt;
     if (this.fireCooldown <= 0) {
       this.fireCooldown += Constants.PLAYER_FIRE_COOLDOWN;
-      return new Bullet(this.id, this.x, this.y, this.direction);
+      const bullets = [];
+      for (let i = 0; i < this.gunLevel; i++) {
+        bullets.push(
+          new Bullet(
+            this.id,
+            this.x,
+            this.y,
+            this.direction + (1/4 * (Math.pow(-1, i) * (2 * i + Math.pow(-1, i) - 1)) * Constants.BULLET_SPREAD)
+          )
+        );
+      }
+      return bullets;
     }
 
     return null;
@@ -34,6 +47,10 @@ class Player extends ObjectClass {
 
   takeBulletDamage() {
     this.hp -= Constants.BULLET_DAMAGE;
+  }
+
+  upgrade() {
+    this.gunLevel++;
   }
 
   onDealtDamage() {

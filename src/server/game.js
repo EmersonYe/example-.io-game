@@ -1,12 +1,16 @@
+
 const Constants = require('../shared/constants');
 const Player = require('./player');
-const applyCollisions = require('./collisions');
+const Upgrade = require('./upgrade');
+
+var collisions = require('./collisions');
 
 class Game {
   constructor() {
     this.sockets = {};
     this.players = {};
     this.bullets = [];
+    this.upgrades = [new Upgrade(1000, 1000)];
     this.lastUpdateTime = Date.now();
     this.shouldSendUpdate = false;
     setInterval(this.update.bind(this), 1000 / 60);
@@ -16,9 +20,7 @@ class Game {
     this.sockets[socket.id] = socket;
 
     // Generate a position to start this player at.
-    const x = Constants.MAP_SIZE * (0.25 + Math.random() * 0.5);
-    const y = Constants.MAP_SIZE * (0.25 + Math.random() * 0.5);
-    this.players[socket.id] = new Player(socket.id, username, x, y);
+    this.players[socket.id] = new Player(socket.id, username, randomXOnMap(), randomYOnMap());
   }
 
   removePlayer(socket) {
@@ -51,20 +53,29 @@ class Game {
     // Update each player
     Object.keys(this.sockets).forEach(playerID => {
       const player = this.players[playerID];
-      const newBullet = player.update(dt);
-      if (newBullet) {
-        this.bullets.push(newBullet);
+      const newBullets = player.update(dt);
+      if (newBullets && newBullets.length) {
+        newBullets.forEach(b => this.bullets.push(b));
       }
     });
 
-    // Apply collisions, give players score for hitting bullets
-    const destroyedBullets = applyCollisions(Object.values(this.players), this.bullets);
+    // Apply bullet collisions, give players score for hitting bullets
+    const destroyedBullets = collisions.applyBulletCollisions(Object.values(this.players), this.bullets);
     destroyedBullets.forEach(b => {
       if (this.players[b.parentID]) {
         this.players[b.parentID].onDealtDamage();
       }
     });
     this.bullets = this.bullets.filter(bullet => !destroyedBullets.includes(bullet));
+
+    // Apply upgrade collisions
+    const destroyedUpgrades = collisions.applyUpgradeCollisions(Object.values(this.players), this.upgrades);
+    this.upgrades = this.upgrades.filter(upgrade => !destroyedUpgrades.includes(upgrade));
+
+    // Spawn upgrades randomly
+    if(Math.random() > 0.99 && this.upgrades.length < Constants.MAX_UPGRADES) {
+      this.upgrades.push(new Upgrade(randomXOnMap(), randomYOnMap()));
+    }
 
     // Check if any players are dead
     Object.keys(this.sockets).forEach(playerID => {
@@ -104,15 +115,29 @@ class Game {
     const nearbyBullets = this.bullets.filter(
       b => b.distanceTo(player) <= Constants.MAP_SIZE / 2,
     );
+    // TODO (mrsn): factor duplicate code out into a method reference.
+    const nearbyUpgrades = this.upgrades.filter(
+      u => u.distanceTo(player) <= Constants.MAP_SIZE / 2,
+    )
 
     return {
       t: Date.now(),
       me: player.serializeForUpdate(),
+      // TODO (mrsn): factor duplicate code out into a method reference.
       others: nearbyPlayers.map(p => p.serializeForUpdate()),
       bullets: nearbyBullets.map(b => b.serializeForUpdate()),
+      upgrades: nearbyUpgrades.map(u => u.serializeForUpdate()),
       leaderboard,
     };
   }
+}
+
+function randomXOnMap() {
+  return Constants.MAP_SIZE * Math.random()
+}
+
+function randomYOnMap() {
+  return Constants.MAP_SIZE * Math.random();
 }
 
 module.exports = Game;

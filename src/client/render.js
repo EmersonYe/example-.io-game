@@ -6,7 +6,7 @@ import { getCurrentState } from './state';
 
 const Constants = require('../shared/constants');
 
-const { PLAYER_RADIUS, PLAYER_MAX_HP, BULLET_RADIUS, MAP_SIZE } = Constants;
+const { PLAYER_RADIUS, PLAYER_MAX_HP, BULLET_RADIUS, UPGRADE_RADIUS, MAP_SIZE } = Constants;
 
 // Get the canvas graphics context
 const canvas = document.getElementById('game-canvas');
@@ -24,7 +24,7 @@ function setCanvasDimensions() {
 window.addEventListener('resize', debounce(40, setCanvasDimensions));
 
 function render() {
-  const { me, others, bullets } = getCurrentState();
+  const { me, others, bullets , upgrades } = getCurrentState();
   if (!me) {
     return;
   }
@@ -39,6 +39,9 @@ function render() {
 
   // Draw all bullets
   bullets.forEach(renderBullet.bind(null, me));
+
+  // Draw all upgrades
+  upgrades.forEach(renderUpgrade.bind(null, me));
 
   // Draw all players
   renderPlayer(me, me);
@@ -107,6 +110,22 @@ function renderBullet(me, bullet) {
     BULLET_RADIUS * 2,
     BULLET_RADIUS * 2,
   );
+  console.log(canvas.width / 2 + x - me.x - BULLET_RADIUS);
+}
+
+function renderUpgrade(me, upgrade) {
+  const { x, y , direction } = upgrade;
+  context.fillStyle = 'blue';
+  context.fillRect(
+    canvas.width / 2 + x - me.x - UPGRADE_RADIUS,
+    canvas.height / 2 + y - me.y - UPGRADE_RADIUS,
+    UPGRADE_RADIUS * 2,
+    UPGRADE_RADIUS * 2
+  );
+  context.save();
+  context.rotate(direction);
+  context.restore();
+  console.log(canvas.width / 2 + x - me.x - BULLET_RADIUS);
 }
 
 function renderMainMenu() {

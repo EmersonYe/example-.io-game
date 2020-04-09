@@ -42,6 +42,7 @@ const game = new Game();
 
 function joinGame(username) {
   game.addPlayer(this, username);
+  console.log(username + 'Joined the battle');
 }
 
 function handleInput(dir) {
