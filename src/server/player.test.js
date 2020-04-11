@@ -17,7 +17,7 @@ describe('Player', () => {
       const player = new Player('123', 'guest');
 
       expect(player.update(Constants.PLAYER_FIRE_COOLDOWN / 3))
-        .toBeInstanceOf(Bullet);
+        .toBeInstanceOf([Bullet]);
     });
 
     it('should not fire bullet during cooldown', () => {

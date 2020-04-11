@@ -51,6 +51,7 @@ class Player extends ObjectClass {
 
   upgrade() {
     this.gunLevel++;
+    this.score+=10;
   }
 
   onDealtDamage() {

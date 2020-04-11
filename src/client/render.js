@@ -110,7 +110,6 @@ function renderBullet(me, bullet) {
     BULLET_RADIUS * 2,
     BULLET_RADIUS * 2,
   );
-  console.log(canvas.width / 2 + x - me.x - BULLET_RADIUS);
 }
 
 function renderUpgrade(me, upgrade) {
@@ -125,7 +124,6 @@ function renderUpgrade(me, upgrade) {
   context.save();
   context.rotate(direction);
   context.restore();
-  console.log(canvas.width / 2 + x - me.x - BULLET_RADIUS);
 }
 
 function renderMainMenu() {

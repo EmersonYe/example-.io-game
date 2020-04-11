@@ -79,6 +79,25 @@ button:focus {
   border-radius: 5px;
 }
 
+#chat {
+  position: fixed;
+  bottom: 10px;
+  width: 100%;
+  background-color: white;
+  padding: 10px;
+  text-align: left;
+}
+
+#chat input {
+  font-size: 18px;
+  outline: none;
+  border: none;
+  width: 100%;
+  border-bottom: 1px solid black;
+  margin-bottom: 5px;
+  padding: 3px;
+}
+
 #leaderboard th {
   text-align: center;
   padding: 2px 5px;
