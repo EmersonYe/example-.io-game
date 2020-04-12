@@ -2,6 +2,7 @@
 const Constants = require('../shared/constants');
 const Player = require('./player');
 const Upgrade = require('./upgrade');
+const Chat = require('./chat');
 
 var collisions = require('./collisions');
 
@@ -11,6 +12,7 @@ class Game {
     this.players = {};
     this.bullets = [];
     this.upgrades = [new Upgrade(1000, 1000)];
+    this.chats = [];
     this.lastUpdateTime = Date.now();
     this.shouldSendUpdate = false;
     setInterval(this.update.bind(this), 1000 / 60);
@@ -21,6 +23,7 @@ class Game {
 
     // Generate a position to start this player at.
     this.players[socket.id] = new Player(socket.id, username, randomXOnMap(), randomYOnMap());
+    console.log(username + ' joined the battle (' + socket.id + ')');
   }
 
   removePlayer(socket) {
@@ -31,6 +34,13 @@ class Game {
   handleInput(socket, dir) {
     if (this.players[socket.id]) {
       this.players[socket.id].setDirection(dir);
+    }
+  }
+
+  handleChat(socket, txt) {
+    if (this.players[socket.id]) {
+      this.chats.push(new Chat(socket.id, txt));
+      console.log(this.players[socket.id].username + ' ('+ this.players[socket.id].id+ '): ' + txt);
     }
   }
 
@@ -76,6 +86,9 @@ class Game {
     if(Math.random() > 0.99 && this.upgrades.length < Constants.MAX_UPGRADES) {
       this.upgrades.push(new Upgrade(randomXOnMap(), randomYOnMap()));
     }
+
+    // Purge old chat messages
+    this.chats = this.chats.filter(chat => (now - chat.creationTime) / 1000 < Constants.CHAT_TTL);
 
     // Check if any players are dead
     Object.keys(this.sockets).forEach(playerID => {
@@ -127,6 +140,7 @@ class Game {
       others: nearbyPlayers.map(p => p.serializeForUpdate()),
       bullets: nearbyBullets.map(b => b.serializeForUpdate()),
       upgrades: nearbyUpgrades.map(u => u.serializeForUpdate()),
+      chats: this.chats,
       leaderboard,
     };
   }

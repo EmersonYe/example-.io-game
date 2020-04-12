@@ -24,5 +24,9 @@ module.exports = Object.freeze({
     GAME_UPDATE: 'update',
     INPUT: 'input',
     GAME_OVER: 'dead',
+    CHAT: 'chat',
   },
+
+  // in seconds
+  CHAT_TTL: 4,
 });

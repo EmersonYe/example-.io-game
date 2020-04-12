@@ -3,9 +3,10 @@ const Constants = require('../shared/constants');
 
 class Chat {
     constructor(parentID, text) {
+        this.id = shortid();
         this.parentID = parentID;
         this.text = text;
-        this.id = shortid();
+        this.creationTime = Date.now();
     }
 
   serializeForUpdate() {
@@ -13,7 +14,7 @@ class Chat {
       id: this.id,
       parentID: this.parentID,
       text: this.text,
-      y: this.y,
+      creationTime: this.creationTime,
     };
   }
 }

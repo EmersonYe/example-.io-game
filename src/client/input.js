@@ -1,6 +1,8 @@
 // Learn more about this file at:
 // https://victorzhou.com/blog/build-an-io-game-part-1/#6-client-input-%EF%B8%8F
 import { updateDirection } from './networking';
+import { sendChat } from './networking';
+import { Chat } from '../server/chat';
 
 const chatParent = document.getElementById('chat');
 const chatInput = document.getElementById('chat-input');
@@ -18,7 +20,8 @@ function onKeyPress(e) {
   if (e.key === 'Enter') {
     if (chatInput === document.activeElement) {
       if (chatInput.value !== '') {
-        console.log(chatInput.value);
+        sendChat(chatInput.value);
+        console.log('Sending message: ' + chatInput.value);
       }
         chatInput.value = '';
         chatParent.classList.add('hidden');

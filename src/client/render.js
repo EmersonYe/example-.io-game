@@ -24,7 +24,7 @@ function setCanvasDimensions() {
 window.addEventListener('resize', debounce(40, setCanvasDimensions));
 
 function render() {
-  const { me, others, bullets , upgrades } = getCurrentState();
+  const { me, others, bullets , upgrades, chats } = getCurrentState();
   if (!me) {
     return;
   }
@@ -43,9 +43,10 @@ function render() {
   // Draw all upgrades
   upgrades.forEach(renderUpgrade.bind(null, me));
 
-  // Draw all players
-  renderPlayer(me, me);
-  others.forEach(renderPlayer.bind(null, me));
+  // Draw all players and chat bubbles
+  renderPlayer(me, me, chats);
+  // others.forEach(renderPlayer.bind(null, me, chats));
+  others.forEach(other => renderPlayer(me, other, chats));
 }
 
 function renderBackground(x, y) {
@@ -66,7 +67,7 @@ function renderBackground(x, y) {
 }
 
 // Renders a ship at the given coordinates
-function renderPlayer(me, player) {
+function renderPlayer(me, player, chats) {
   const { x, y, direction } = player;
   const canvasX = canvas.width / 2 + x - me.x;
   const canvasY = canvas.height / 2 + y - me.y;
@@ -99,6 +100,16 @@ function renderPlayer(me, player) {
     PLAYER_RADIUS * 2 * (1 - player.hp / PLAYER_MAX_HP),
     2,
   );
+
+  // Draw chat bubbles
+  const playerChats = Array.from(chats).filter(chat => chat.parentID === player.id)
+    .sort((a, b) => a.creationTime - b.creationTime);
+  if(playerChats.length) {
+    context.font = '30px Arial';
+    context.fillStyle = 'white';
+    playerChats.forEach(
+      (chat, idx) => context.fillText(chat.text, canvasX - PLAYER_RADIUS, canvasY - ((PLAYER_RADIUS*1.5) * (playerChats.length - idx))));
+  }
 }
 
 function renderBullet(me, bullet) {
